@@ -6,6 +6,5 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-pcap = "0.9.1"
 evmap = "10.0.0"
 evmap-derive = "0.2.0"
