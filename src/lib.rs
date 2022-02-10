@@ -1,6 +1,5 @@
 pub mod receiver;
 pub mod bike;
-mod arp;
 
 use receiver::Receiver;
 
