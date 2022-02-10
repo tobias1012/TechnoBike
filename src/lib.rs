@@ -1,3 +1,16 @@
+pub mod receiver;
+pub mod bike;
+mod arp;
+
+use receiver::Receiver;
+
+pub fn start_listener() -> receiver::Receiver {
+
+    let mut recv = Receiver::new("3381");
+
+    recv
+}
+
 #[cfg(test)]
 mod tests {
     #[test]
