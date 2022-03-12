@@ -3,11 +3,11 @@ use evmap_derive::ShallowCopy;
 
 #[derive(Clone, Eq, Hash, ShallowCopy)]
 pub struct Bike {
-    id: String,
-    watt: u16,
-    watt_percentage: u8,
-    rpm: u8,
-    fps: u8, //FPS is Functional Threshold Power? is a percentage
+    pub id: String,
+    pub watt: u16,
+    pub watt_percentage: u8,
+    pub rpm: u8,
+    pub fps: u8, //FPS is Functional Threshold Power? is a percentage
     
     
 }
