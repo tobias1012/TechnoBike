@@ -7,7 +7,7 @@ use crate::bike::Bike;
 
 pub struct Receiver {
     socket: UdpSocket,
-    reader: evmap::ReadHandle<String, Bike>,
+    pub reader: evmap::ReadHandle<String, Bike>,
     writer: evmap::WriteHandle<String, Bike>,
 
 }
