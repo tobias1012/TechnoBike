@@ -6,7 +6,7 @@ pub struct Bike {
     id: String,
     watt: u16,
     watt_percentage: u8,
-    rpm: u16,
+    rpm: u8,
     fps: u8, //FPS is Functional Threshold Power? is a percentage
     
     
@@ -24,7 +24,7 @@ impl Bike {
         }
     }
 
-    pub fn new_val(id: String, watt: u16, watt_percentage: u8, rpm: u16) -> Bike{
+    pub fn new_val(id: String, watt: u16, watt_percentage: u8, rpm: u8) -> Bike{
         Bike {
             id: id,
             watt: watt,
@@ -34,7 +34,7 @@ impl Bike {
         }
     }
 
-    pub fn update(&mut self, watt: u16, watt_percentage: u8, rpm: u16,) {
+    pub fn update(&mut self, watt: u16, watt_percentage: u8, rpm: u8,) {
         self.watt = watt;
         self.watt_percentage = watt_percentage;
         self.rpm = rpm;

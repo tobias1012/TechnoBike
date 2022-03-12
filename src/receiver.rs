@@ -42,7 +42,7 @@ impl Receiver {
 
     pub fn get_bikes(&mut self) -> Vec<Bike> {
         let mut ret = Vec::new();
-        for (id, bikes) in &self.reader.read().unwrap() {
+        for (_id, bikes) in &self.reader.read().unwrap() {
             // Should only be one bike
             for bike in bikes {
                 ret.push(bike.clone());
@@ -63,13 +63,13 @@ impl Receiver {
 
         //Check for the magic bytes that define the packet
         let magic = ((buffer[1] as u16) << 8) + buffer[0] as u16;
-        if magic != 0x3114 {
+        if magic != 0x3114 { // or 0x1431 not sure
             return
         }
-        let id = String::from(str::from_utf8(&buffer[10..14]).expect("Could not parse bytes to id")); // ARBITRARY VALUES TODO: Find the real offsets
-        let watt = ((buffer[1] as u16) << 8) + buffer[0] as u16; // ARBITRARY VALUES TODO: Find the real offsets
-        let watt_percentage = buffer[1]; // ARBITRARY VALUES TODO: Find the real offsets
-        let rpm = ((buffer[1] as u16) << 8) + buffer[0] as u16; // ARBITRARY VALUES TODO: Find the real offsets
+        let id = String::from(str::from_utf8(&buffer[4..21]).expect("Could not parse bytes to id")); 
+        let watt = ((buffer[19] as u16) << 8) + buffer[18] as u16; 
+        let watt_percentage = buffer[14]; 
+        let rpm = buffer[14]; // TODO: Find den rigtige RPM, det er muligt den er lige efter, men mine noter er ikke så gode
 
         //Check if id is in array
         /*if !true {
