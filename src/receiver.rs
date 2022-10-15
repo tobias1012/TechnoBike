@@ -1,12 +1,24 @@
-use std::net::{UdpSocket};
+use std::net::{UdpSocket, TcpListener, TcpStream};
 use std::str;
 use Vec;
 use evmap;
+use std::io::{self, Write};
+
 
 use crate::bike::Bike;
 
+fn handle_tcp(mut stream: TcpStream) {
+    stream.write(b"HTTP/1.0 200 OK
+Content-type: text/html
+Content-Length: 13
+
+presence=true\0");
+}
+
+
 pub struct Receiver {
     socket: UdpSocket,
+    tcp_socket: TcpListener,
     pub reader: evmap::ReadHandle<String, Bike>,
     writer: evmap::WriteHandle<String, Bike>,
 
@@ -14,14 +26,16 @@ pub struct Receiver {
 
 impl Receiver {
     pub fn new(port: &str) -> Receiver {
-        let mut bind_addr: String = String::from("127.0.0.1:");
+        let mut bind_addr: String = String::from("0.0.0.0:");
         bind_addr.push_str(port);
 
-        let socket = UdpSocket::bind(bind_addr).expect("Failed to bind to address");
+        let socket = UdpSocket::bind(&bind_addr).expect("Failed to bind to address");
+        let mut tcp_socket = TcpListener::bind(&bind_addr).expect("Failed to bind tcp to address");
         let (bikes_r, mut bikes_w) = evmap::new();
 
         Receiver {
             socket: socket,
+            tcp_socket: tcp_socket,
             reader: bikes_r,
             writer: bikes_w,
         }
@@ -29,14 +43,37 @@ impl Receiver {
 
     pub fn receiver_loop(&mut self) {
         let mut buffer: [u8; 256] = [0;256];
-        
-
+        self.socket.set_nonblocking(true).unwrap();
         
         loop {
-             let (number_of_bytes, src_addr) = self.socket.recv_from(&mut buffer).expect("Didn't recieve data");
             
-             let filled_buffer = buffer[..number_of_bytes].to_vec();
-             self.parse_packet(filled_buffer);
+            for stream in self.tcp_socket.incoming() {
+                handle_tcp(stream.expect("msg"));
+            }
+
+            let filled_buffer: Vec<u8>;
+            /*match self.socket.recv_from(&mut buffer) {
+                Ok(n) => {filled_buffer = buffer[..n.0].to_vec();},
+                Err(_n) => (continue)
+             }*/
+             //if number_of_bytes == 0 {continue;}
+             //self.parse_packet(filled_buffer);
+
+             let (num_bytes_read, _) = loop {
+                match self.socket.recv_from(&mut buffer) {
+                    Ok(n) => break n,
+                    Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {
+                        // wait until network socket is ready, typically implemented
+                        // via platform-specific APIs such as epoll or IOCP
+                        //wait_for_fd();
+                        println!("Didnt work");
+                    }
+                    Err(e) => panic!("encountered IO error: {e}"),
+        
+                }
+            };
+
+
         }
     }
 
@@ -94,4 +131,6 @@ impl Receiver {
 
 
     }
+
+    
 }
