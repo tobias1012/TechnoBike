@@ -5,6 +5,7 @@ use evmap_derive::ShallowCopy;
 pub struct Bike {
     pub id: String,
     pub watt: u16,
+    pub watt_previous: u16,
     pub watt_percentage: u8,
     pub rpm: u8,
     pub fps: u8, //FPS is Functional Threshold Power? is a percentage
@@ -18,6 +19,7 @@ impl Bike {
         Bike {
             id: id,
             watt: 0,
+            watt_previous: 0,
             watt_percentage: 0,
             rpm: 0,
             fps: 0
@@ -28,6 +30,7 @@ impl Bike {
         Bike {
             id: id,
             watt: watt,
+            watt_previous: 0,
             watt_percentage: watt_percentage,
             rpm: rpm,
             fps: 0,

@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 evmap = "10.0.0"
 evmap-derive = "0.2.0"
+tiny_http = {git = "https://github.com/tobias1012/tiny-http.git"}
