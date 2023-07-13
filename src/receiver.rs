@@ -1,5 +1,6 @@
 use std::net::{UdpSocket, TcpListener, TcpStream};
 use std::str;
+use std::sync::{Mutex, MutexGuard};
 use Vec;
 use evmap;
 
@@ -10,7 +11,8 @@ use crate::bike::Bike;
 pub struct Receiver {
     socket: UdpSocket,
     pub reader: evmap::ReadHandle<String, Bike>,
-    writer: evmap::WriteHandle<String, Bike>,
+    //pub writer: evmap::WriteHandle<String, Bike>,
+    pub writer: Mutex<evmap::WriteHandle<String, Bike>>
 
 }
 
@@ -20,12 +22,12 @@ impl Receiver {
         bind_addr.push_str(port);
 
         let socket = UdpSocket::bind(&bind_addr).expect("Failed to bind to address");
-        let (bikes_r, mut bikes_w) = evmap::new();
+        let (bikes_r, bikes_w) = evmap::new();
 
         Receiver {
             socket: socket,
             reader: bikes_r,
-            writer: bikes_w,
+            writer: Mutex::new(bikes_w),
         }
     }
 
@@ -90,6 +92,11 @@ impl Receiver {
             println!("packet not the right magic byte");
             return
         }
+
+        //lock the mutex
+        let mut state_guard: MutexGuard<evmap::WriteHandle<String, Bike>> = self.writer.lock().unwrap();
+
+
         //println!("parsing data");
         let id = String::from(str::from_utf8(&buffer[5..21]).expect("Could not parse bytes to id")); 
         //let watt = ((buffer[19] as u16) << 8) + buffer[18] as u16; 
@@ -97,21 +104,32 @@ impl Receiver {
         let max_watt = buffer[28] as u16; //tested, might be right
         let watt_percentage = buffer[41]; 
         let rpm = buffer[41]; // TODO: Find den rigtige RPM, det er muligt den er lige efter, men mine noter er ikke så gode
-
+    
         //Check if id is in array
         /*if !true {
             //The ID doesn't exist, so we add it
-            let bike = Bike::new(id.clone());
             self.writer.insert(id.clone(), bike);
             self.writer.refresh();
             //self.bikes.lock().unwrap().insert(id.clone(),bike);
         }*/
 
+        //set the name if we cant get it
+        let mut name: String = String::from("null");
+        let mut age: u8 = 0;
+        let mut weight: u16 = 75; 
+        if let Some(bikes) = self.reader.get(&id) {
+            for bike in &*bikes {
+                name = bike.name.clone();
+                age = bike.age;
+                weight = bike.weight;
+            }
+        }
+
         //Add the values to the right bike
-        self.writer.empty(id.clone());
-        let new_bike = Bike::new_val(id.clone(), watt, watt_percentage, rpm);
-        self.writer.insert(id, new_bike);
-        self.writer.refresh();
+        state_guard.empty(id.clone());
+        let new_bike = Bike::new_val(id.clone(), watt, watt_percentage, rpm, name, age, weight);
+        state_guard.insert(id, new_bike);
+        state_guard.refresh();
 
         /*self.bikes.lock().unwrap().get(&id).unwrap().update(
             watt,
