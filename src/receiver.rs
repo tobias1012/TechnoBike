@@ -100,10 +100,11 @@ impl Receiver {
         //println!("parsing data");
         let id = String::from(str::from_utf8(&buffer[5..21]).expect("Could not parse bytes to id")); 
         //let watt = ((buffer[19] as u16) << 8) + buffer[18] as u16; 
-        let watt = buffer[24] as u16;
+        //let watt = buffer[24] as u16;
+        let watt = (buffer[24] as u16) + ((buffer[23] as u16) * 255);
         let max_watt = buffer[28] as u16; //tested, might be right
-        let watt_percentage = buffer[41]; 
-        let rpm = buffer[41]; // TODO: Find den rigtige RPM, det er muligt den er lige efter, men mine noter er ikke så gode
+        let watt_percentage = buffer[41]; //TODO: find den rigtige 
+        let rpm = buffer[31]; // TODO: Find den rigtige RPM, det er muligt den er lige efter, men mine noter er ikke så gode
     
         //Check if id is in array
         /*if !true {
